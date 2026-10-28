@@ -1,0 +1,180 @@
+-- ================= BOOTSTRAP LAZY =================
+local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
+if not vim.loop.fs_stat(lazypath) then
+  vim.fn.system({
+    "git",
+    "clone",
+    "--filter=blob:none",
+    "https://github.com/folke/lazy.nvim.git",
+    "--branch=stable",
+    lazypath,
+  })
+end
+vim.opt.rtp:prepend(lazypath)
+
+-- ================= BASIC OPTIONS =================
+vim.g.mapleader = " "
+
+vim.opt.number = true
+vim.opt.relativenumber = true
+vim.opt.cursorline = true
+vim.opt.termguicolors = true
+vim.opt.mouse = "a"
+
+vim.opt.tabstop = 4
+vim.opt.shiftwidth = 4
+vim.opt.expandtab = true
+vim.opt.smartindent = true
+
+vim.opt.ignorecase = true
+vim.opt.smartcase = true
+
+-- ================= PLUGINS =================
+require("lazy").setup({
+
+  -- THEME
+  {
+    "catppuccin/nvim",
+    name = "catppuccin",
+    priority = 1000,
+    config = function()
+      require("catppuccin").setup({ flavour = "mocha" })
+      vim.cmd.colorscheme("catppuccin")
+    end,
+  },
+
+  -- STATUSLINE
+  {
+    "nvim-lualine/lualine.nvim",
+    dependencies = { "nvim-tree/nvim-web-devicons" },
+    config = function()
+      require("lualine").setup({
+        options = { theme = "catppuccin" },
+      })
+    end,
+  },
+
+  -- TREESITTER
+    {
+      "nvim-treesitter/nvim-treesitter",
+      build = ":TSUpdate",
+      lazy = false,   -- ⭐ IMPORTANT
+      priority = 900, -- load early
+      config = function()
+        require("nvim-treesitter.config").setup({
+          ensure_installed = {
+            "lua",
+            "python",
+            "bash",
+            "json",
+            "yaml",
+            "markdown",
+            "vim",
+            "vimdoc",
+          },
+          highlight = { enable = true },
+          indent = { enable = true },
+        })
+      end,
+    },
+  -- TELESCOPE
+  {
+    "nvim-telescope/telescope.nvim",
+    branch = "0.1.x",
+    dependencies = { "nvim-lua/plenary.nvim" },
+    config = function()
+      local builtin = require("telescope.builtin")
+      vim.keymap.set("n", "<leader>ff", builtin.find_files)
+      vim.keymap.set("n", "<leader>fg", builtin.live_grep)
+    end,
+  },
+
+  -- MASON
+  {
+    "williamboman/mason.nvim",
+    build = ":MasonUpdate",
+    config = function()
+      require("mason").setup()
+    end,
+  },
+
+  -- MASON LSP
+  {
+    "williamboman/mason-lspconfig.nvim",
+    dependencies = { "williamboman/mason.nvim" },
+    config = function()
+      require("mason-lspconfig").setup({
+        ensure_installed = { "pyright", "ruff", "lua_ls" },
+      })
+    end,
+  },
+
+  -- LSP (0.11+ NATIVE STYLE)
+  {
+    "neovim/nvim-lspconfig",
+    config = function()
+
+      -- Capabilities (for nvim-cmp)
+      local capabilities = vim.lsp.protocol.make_client_capabilities()
+      local ok, cmp_lsp = pcall(require, "cmp_nvim_lsp")
+      if ok then
+        capabilities = cmp_lsp.default_capabilities(capabilities)
+      end
+
+      -- PYRIGHT
+      vim.lsp.config("pyright", {
+        capabilities = capabilities,
+      })
+      vim.lsp.enable("pyright")
+
+      -- RUFF
+      vim.lsp.config("ruff", {
+        capabilities = capabilities,
+      })
+      vim.lsp.enable("ruff")
+
+      -- LUA
+      vim.lsp.config("lua_ls", {
+        capabilities = capabilities,
+        settings = {
+          Lua = {
+            diagnostics = { globals = { "vim" } },
+          },
+        },
+      })
+      vim.lsp.enable("lua_ls")
+    end,
+  },
+
+  -- AUTOCOMPLETION
+  {
+    "hrsh7th/nvim-cmp",
+    dependencies = {
+      "hrsh7th/cmp-nvim-lsp",
+      "L3MON4D3/LuaSnip",
+      "saadparwaiz1/cmp_luasnip",
+    },
+    config = function()
+      local cmp = require("cmp")
+      local luasnip = require("luasnip")
+
+      cmp.setup({
+        snippet = {
+          expand = function(args)
+            luasnip.lsp_expand(args.body)
+          end,
+        },
+        mapping = cmp.mapping.preset.insert({
+          ["<Tab>"] = cmp.mapping.select_next_item(),
+          ["<S-Tab>"] = cmp.mapping.select_prev_item(),
+          ["<CR>"] = cmp.mapping.confirm({ select = true }),
+        }),
+        sources = {
+          { name = "nvim_lsp" },
+          { name = "luasnip" },
+        },
+      })
+    end,
+  },
+
+})

@@ -1,0 +1,77 @@
+# ✿ Pink Sakura Starship ✿
+# Pastel pink, lavender, mint and soft peach
+
+"$schema" = 'https://starship.rs/config-schema.json'
+
+add_newline = true
+palette = "sakura"
+
+format = """
+[🌸](bold pink) \
+$directory\
+$git_branch\
+$git_status\
+$python\
+$lua\
+$nodejs\
+$cpp\
+$rust\
+$cmd_duration\
+$line_break\
+$character"""
+
+[palettes.sakura]
+pink = "#F5A9CF"
+lavender = "#C9A7F4"
+mint = "#A8D8C1"
+peach = "#F8C8A4"
+cream = "#F9E7F0"
+muted = "#9F91B9"
+red = "#F38BA8"
+
+# Current folder
+[directory]
+style = "bold pink"
+format = "[$path]($style) "
+truncation_length = 1
+truncate_to_repo = false
+fish_style_pwd_dir_length = 0
+
+# Git branch
+[git_branch]
+style = "bold lavender"
+format = "[on](muted) [$symbol$branch]($style) "
+
+# Git working tree
+[git_status]
+style = "mint"
+format = "([$all_status$ahead_behind]($style) )"
+
+# Programming languages
+[python]
+symbol = "🐍 "
+style = "bold peach"
+format = "[via $symbol$version]($style) "
+
+[lua]
+symbol = "🌙 "
+style = "bold lavender"
+format = "[via $symbol Lua]($style) "
+
+[rust]
+symbol = "🦀 "
+style = "bold peach"
+format = "[via $symbol$version]($style) "
+
+# How long the previous command took
+[cmd_duration]
+min_time = 2000
+style = "muted"
+format = "[took $duration]($style) "
+
+# Your command prompt
+[character]
+success_symbol = "[❯](bold pink)"
+error_symbol = "[❯](bold red)"
+vimcmd_symbol = "[❮](bold lavender)"
+
